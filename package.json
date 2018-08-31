@@ -1,6 +1,6 @@
 {
   "name": "aws-vpn",
-  "version": "0.0.6",
+  "version": "0.0.1",
   "bin": {
     "aws-vpn": "bin/aws-vpn.js"
   },

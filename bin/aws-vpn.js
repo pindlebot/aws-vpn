@@ -61,6 +61,5 @@ const _ = yargs
     await require('../src/remove-instance')(argv.instanceId)
   })
   .command('create', '', () => {}, async (argv) => {
-    process.env.AWS_REGION = argv.region || process.env.AWS_REGION
-    require('../src')()
+    require('../src/create')()
   }).argv
