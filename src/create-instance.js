@@ -1,12 +1,8 @@
 const AWS = require('aws-sdk')
 const { KEY_NAME, AMI } = require('./constants')
 const ec2 = new AWS.EC2({ region: process.env.AWS_REGION })
-const got = require('got')
 const { exec } = require('child_process')
-
-const getLocation = () => {
-  return got('http://ip-api.com/json', { json: true }).then(({ body }) => body)
-}
+const { getLocation } = require('./util')
 
 const createScript = ({ ip, org, label, location, email }) => `#!/usr/bin/env bash
 
