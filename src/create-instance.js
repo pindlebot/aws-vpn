@@ -54,10 +54,7 @@ const createInstance = async ({ GroupId, PublicIp }) => {
         Value: label
       }]
     }],
-    UserData: UserData,
-    IamInstanceProfile: {
-      Arn: 'arn:aws:iam::761245233224:instance-profile/mint-julep-ec2'
-    }
+    UserData: UserData
   }).promise()
   const { InstanceId } = Instances[0]
   return {
