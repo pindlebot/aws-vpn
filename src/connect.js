@@ -9,14 +9,27 @@ const listInstances = require('./list-instances')
 const { HOME, PID_FILE } = require('./constants')
 const scp = require('./scp')
 const AWS = require('aws-sdk')
+const IP_REGEX = /(\d{1,3}\.){3}\d{1,3}/
 
-const getOpenVpnName = async (currentIp) => {
+const getOpenVpnName = async ({ currentIp, name }) => {
+  let target
+  if (name) {
+    if (!IP_REGEX.test(name)) {
+      return name
+    } else {
+      target = name
+    }
+  }
   let instances = await listInstances()
   instances = instances
     .filter(({ State, PublicIpAddress }) =>
       State.Name === 'running' &&
       PublicIpAddress !== currentIp
     )
+  if (target) {
+    let instance = instances.find(({ PublicIpAddress }) => PublicIpAddress === target)
+    return instance.Tags.find(({ Key }) => Key === 'Label').Value
+  }
   let names = instances.map(instance =>
     instance.Tags.find(({ Key }) => Key === 'Label').Value
   )
@@ -38,14 +51,14 @@ const getInstanceByLabel = async ({ label }) => {
   return instances[0]
 }
 
-module.exports = async (argv) => {
+module.exports = async (params = {}) => {
   let currentIp = await getIp()
   let pids = await getPids()
   if (pids.length) {
     await killAll()
   }
   console.log('Your current IP address is ' + currentIp)
-  let name = argv.name ? argv.name : await getOpenVpnName(currentIp)
+  let name = await getOpenVpnName({ ...params, currentIp })
   let ovpn = path.join(HOME, `${name}.ovpn`)
   try {
     await access(ovpn)
