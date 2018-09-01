@@ -1,10 +1,11 @@
 const { spawn } = require('child_process')
-const { PRIVATE_KEY_PATH, HOME } = require('./constants')
+const { HOME } = require('./constants')
 const path = require('path')
 const { promisify } = require('util')
 const fs = require('fs')
 const read = promisify(fs.readFile)
 const write = promisify(fs.writeFile)
+const { getPrivateKeyPath } = require('./util')
 
 const removeKnownHostIfNeeded = async (host) => {
   let raw = await read(path.join(HOME, '.ssh/known_hosts'), { encoding: 'utf8' })
@@ -23,6 +24,7 @@ const removeKnownHostIfNeeded = async (host) => {
 }
 
 module.exports = async ({ host, label }) => {
+  const PRIVATE_KEY_PATH = getPrivateKeyPath()
   await removeKnownHostIfNeeded(host)
   label = label || process.env.OPEN_VPN_LABEL
   let args = [`${host}:/home/ubuntu/${label}.ovpn`, path.join(HOME, `${label}.ovpn`)]

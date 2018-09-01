@@ -1,7 +1,9 @@
 const { spawn } = require('child_process')
-const { PRIVATE_KEY_PATH } = require('./constants')
+const { getPrivateKeyPath } = require('./util')
+const { gauge } = require('./gauge')
 
 module.exports = ({ host }) => {
+  const PRIVATE_KEY_PATH = getPrivateKeyPath()
   const label = process.env.OPEN_VPN_LABEL
   let args = [
     '-i',
@@ -21,7 +23,9 @@ module.exports = ({ host }) => {
       reject(err || new Error('not ready'))
     }
   })
-
+  child.stdout.once('data', async () => {
+    await gauge().disable()
+  })
   child.stdout.on('data', data => {
     if (/Data Base Updated/.test(data.toString())) {
       process.kill(child.pid)

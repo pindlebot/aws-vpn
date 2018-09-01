@@ -2,7 +2,7 @@
 
 const yargs = require('yargs')
 const scp = require('../src/scp')
-const { killAll } = require('../src/util')
+const { kill } = require('../src/util')
 const connect = require('../src/connect')
 const Haikunator = require('haikunator')
 const listInstances = require('../src/list-instances')
@@ -23,26 +23,35 @@ const _ = yargs
     type: 'string',
     default: haikunator.haikunate()
   })
+  .option('no-cache', {
+    type: 'boolean',
+    default: false
+  })
   .middleware([(argv) => {
-    let { region, label, org } = argv
+    let { region, label, org, noCache } = argv
     process.env.AWS_REGION = region
     process.env.OPEN_VPN_LABEL = label
     process.env.OPEN_VPN_ORG = org
+    process.env.NO_CACHE = noCache
     return {}
   }])
+  .command('debug', '', () => {}, (argv) => {
+    console.log(argv)
+  })
   .command('list', '', () => {}, async (argv) => {
     const instances = await listInstances()
     let table = instances.map(instance => ({
       InstanceId: instance.InstanceId,
       PublicIpAddress: instance.PublicIpAddress || 'NA',
       LaunchTime: instance.LaunchTime,
-      Name: instance.Tags.find(({ Key }) => Key === 'Label').Value,
-      State: instance.State.Name
+      Label: instance.Label,
+      State: instance.State.Name,
+      Zone: instance.Placement.AvailabilityZone
     }))
     console.table(table)
   })
   .command('kill', '', () => {}, async () => {
-    await killAll()
+    await kill()
   })
   .command('load', '', () => {}, async argv => {
     let instances = await listInstances()

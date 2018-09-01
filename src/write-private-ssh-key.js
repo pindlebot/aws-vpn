@@ -4,9 +4,10 @@ const { promisify } = require('util')
 const fs = require('fs')
 const write = promisify(fs.writeFile)
 const chmod = promisify(fs.chmod)
-const { PRIVATE_KEY_PATH } = require('./util')
+const { getPrivateKeyPath } = require('./util')
 
 module.exports = async (progress) => {
+  const PRIVATE_KEY_PATH = getPrivateKeyPath()
   const hasKey = await hasPrivateKey()
   if (!hasKey) {
     progress.increment('Creating key pair')

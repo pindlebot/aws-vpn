@@ -1,6 +1,5 @@
 const AWS = require('aws-sdk')
-const { KEY_NAME, AMI } = require('./constants')
-const ec2 = new AWS.EC2({ region: process.env.AWS_REGION })
+const { KEY_NAME } = require('./constants')
 const { exec } = require('child_process')
 const { getLocation } = require('./util')
 
@@ -21,7 +20,12 @@ cp /root/client-configs/files/${label}.ovpn /home/ubuntu/${label}.ovpn
 chown ubuntu:ubuntu /home/ubuntu/${label}.ovpn
 `
 
+const AMAZON_IMAGES = require('./amazon-images')
+
 const createInstance = async ({ GroupId, PublicIp }) => {
+  const { ami } = AMAZON_IMAGES.find(({ region }) => region === process.env.AWS_REGION)
+  const ec2 = new AWS.EC2({ region: process.env.AWS_REGION })
+
   const email = await new Promise((resolve, reject) =>
     exec('git config --get user.email', {}, (err, data) => {
       if (err) reject(err)
@@ -37,7 +41,7 @@ const createInstance = async ({ GroupId, PublicIp }) => {
     SecurityGroupIds: [GroupId],
     KeyName: KEY_NAME,
     InstanceType: 't2.micro',
-    ImageId: AMI,
+    ImageId: ami,
     MaxCount: 1,
     MinCount: 1,
     TagSpecifications: [{

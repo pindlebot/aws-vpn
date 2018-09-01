@@ -1,7 +1,8 @@
 const AWS = require('aws-sdk')
-const ec2 = new AWS.EC2({ region: process.env.AWS_REGION })
 
 const isRunning = async ({ InstanceId }) => {
+  const ec2 = new AWS.EC2({ region: process.env.AWS_REGION })
+
   let { InstanceStatuses } = await ec2.describeInstanceStatus({
     InstanceIds: [InstanceId]
   }).promise()

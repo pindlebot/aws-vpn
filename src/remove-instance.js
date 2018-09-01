@@ -6,8 +6,12 @@ const { promisify } = require('util')
 const fs = require('fs')
 const unlink = promisify(fs.unlink)
 const { HOME } = require('./constants')
+const config = require('./config')
 
 const removeInstance = async (id) => {
+  let cache = await config.get()
+  let instances = [...cache.instances].filter(({ instanceId }) => instanceId !== id)
+  await config.set({ instances })
   let { Reservations } = await ec2.describeInstances({ InstanceIds: [id] }).promise()
   let instance = Reservations.map(({ Instances }) => Instances[0])[0]
   let securityGroups = instance.SecurityGroups.filter(sg => /aws-vpn/.test(sg.GroupName))

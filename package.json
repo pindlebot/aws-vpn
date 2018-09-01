@@ -8,12 +8,13 @@
     "type": "git",
     "url": "https://github.com/unshift/aws-vpn.git"
   },
-  "main": "bin/aws-vpn.js",
+  "main": "src/index.js",
   "scripts": {
     "lint": "standard src/*.js | snazzy"
   },
   "dependencies": {
     "aws-sdk": "^2.288.0",
+    "deepmerge": "^2.1.1",
     "dotenv": "^6.0.0",
     "gauge": "^2.7.4",
     "got": "^9.1.0",
