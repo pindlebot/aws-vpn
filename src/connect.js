@@ -37,23 +37,30 @@ const getOpenVpnName = async ({ currentIp, name }) => {
     return instance.Label
   }
   let names = instances.map(instance => instance.Label)
-  
+
   return names[Math.floor(Math.random() * instances.length)]
 }
 
 const getInstanceByLabel = async ({ label }) => {
-  const ec2 = new AWS.EC2({ region: process.env.AWS_REGION })
-  let { Reservations } = await ec2.describeInstances({
-    Filters: [{
-      Name: 'tag:Owner',
-      Values: ['aws-vpn']
-    }, {
-      Name: 'tag:Label',
-      Values: [label]
-    }]
-  }).promise()
-  let instances = Reservations.map(({ Instances }) => Instances[0])
-  return instances[0]
+  let cache = await config.get()
+  let inst = cache.instances.find(intance => intance.label === label)
+  return {
+    InstanceId: inst.instanceId,
+    PublicIpAddress: inst.ip,
+    Label: inst.label
+  }
+  // const ec2 = new AWS.EC2({ region: process.env.AWS_REGION })
+  // let { Reservations } = await ec2.describeInstances({
+  //  Filters: [{
+  //    Name: 'tag:Owner',
+  //    Values: ['aws-vpn']
+  //  }, {
+  //    Name: 'tag:Label',
+  //    Values: [label]
+  //  }]
+  // }).promise()
+  // let instances = Reservations.map(({ Instances }) => Instances[0])
+  // return instances[0]
 }
 
 module.exports = async (params = {}) => {
