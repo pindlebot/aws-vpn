@@ -1,14 +1,12 @@
 const path = require('path')
 const { promisify } = require('util')
 const fs = require('fs')
-const write = promisify(fs.writeFile)
 const access = promisify(fs.access)
 const { fork } = require('child_process')
 const { kill, getIp } = require('./util')
 const listInstances = require('./list-instances')
-const { HOME, PID_FILE } = require('./constants')
+const { HOME } = require('./constants')
 const scp = require('./scp')
-const AWS = require('aws-sdk')
 const IP_REGEX = /(\d{1,3}\.){3}\d{1,3}/
 const config = require('./config')
 
@@ -49,18 +47,6 @@ const getInstanceByLabel = async ({ label }) => {
     PublicIpAddress: inst.ip,
     Label: inst.label
   }
-  // const ec2 = new AWS.EC2({ region: process.env.AWS_REGION })
-  // let { Reservations } = await ec2.describeInstances({
-  //  Filters: [{
-  //    Name: 'tag:Owner',
-  //    Values: ['aws-vpn']
-  //  }, {
-  //    Name: 'tag:Label',
-  //    Values: [label]
-  //  }]
-  // }).promise()
-  // let instances = Reservations.map(({ Instances }) => Instances[0])
-  // return instances[0]
 }
 
 module.exports = async (params = {}) => {
@@ -69,6 +55,10 @@ module.exports = async (params = {}) => {
   console.log('Your current IP address is ' + currentIp)
   let name = await getOpenVpnName({ ...params, currentIp })
   let ovpn = path.join(HOME, `${name}.ovpn`)
+  if (typeof process.env.SUDO_UID === 'undefined') {
+    console.log('Command must be run with sudo')
+    process.exit(1)
+  }
   try {
     await access(ovpn)
   } catch (err) {

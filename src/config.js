@@ -27,7 +27,7 @@ const preload = (pathname) => {
   } catch (err) {
     json = DEFAULT_CONFIG
   }
-  return JSON.parse(json)
+  return JSON.parse(json || DEFAULT_CONFIG)
 }
 
 class Config {

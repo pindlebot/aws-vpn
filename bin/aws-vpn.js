@@ -51,6 +51,10 @@ const _ = yargs
     console.table(table)
   })
   .command('kill', '', () => {}, async () => {
+    if (typeof process.env.SUDO_UID === 'undefined') {
+      console.log('Command must be run with sudo')
+      process.exit(1)
+    }
     await kill()
   })
   .command('load', '', () => {}, async argv => {
